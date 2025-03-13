@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chatbot</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h1 class="text-center">Gemini 1.5 Flash Model Chatbot</h1>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="true">Chatbot</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="news-tab" data-toggle="tab" href="#news" role="tab" aria-controls="news" aria-selected="false">Cybersecurity News</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent"></div>
+        <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+            <form id="chat-form" class="mb-4 mt-4">
+                <div class="form-group">
+                    <label for="user-input">Enter your query:</label>
+                    <input type="text" id="user-input" name="input" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+            <div id="response" class="alert alert-info" role="alert"></div>
+        </div>
+        <div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab"></div>
+            <div class="mt-4">
+                <h2>Cybersecurity News</h2>
+                <div id="news-content" class="mt-3">
+                    <!-- News content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#chat-form').on('submit', async function(event) {
+                event.preventDefault();
+                const userInput = $('#user-input').val();
+
+                const responseDiv = $('#response');
+                responseDiv.html('Loading...');
+                responseDiv.removeClass('alert-danger alert-success').addClass('alert-info');
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ input: userInput })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        responseDiv.html(`<p>${data.response}</p>`);
+                        responseDiv.removeClass('alert-info').addClass('alert-success');
+                    } else {
+                        responseDiv.html(`<p>Error: ${data.error}</p>`);
+                        responseDiv.removeClass('alert-info').addClass('alert-danger');
+                    }
+                } catch (error) {
+                    responseDiv.html(`<p>Error: ${error.message}</p>`);
+                    responseDiv.removeClass('alert-info').addClass('alert-danger');
+                }
+            });
+
+            // Load cybersecurity news when the news tab is clicked
+            $('#news-tab').on('click', async function() {
+                const newsContent = $('#news-content');
+                newsContent.html('Loading news...');
+
+                try {
+                    const response = await fetch('/news');
+                    const data = await response.json();
+                    if (response.ok) {
+                        newsContent.html(data.articles.map(article => `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">${article.title}</h5>
+                                    <p class="card-text">${article.description}</p>
+                                    <a href="${article.url}" class="btn btn-primary" target="_blank">Read more</a>
+                                </div>
+                            </div>
+                        `).join(''));
+                    } else {
+                        newsContent.html(`<p>Error: ${data.error}</p>`);
+                    }
+                } catch (error) {
+                    newsContent.html(`<p>Error: ${error.message}</p>`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
