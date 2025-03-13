@@ -17,7 +17,7 @@ async function queryGeminiModel(input) {
 
 async function queryGeminiModelCyberSecurityNews() {
     const { GoogleGenerativeAI } = require("@google/generative-ai");
-    const apiKey = "AIzaSyAX6aOzupGfAW8njCjBPo6DQt6FitNr6cg" //process.env.GOOGLE_API_KEY;
+    const apiKey = "" //process.env.GOOGLE_API_KEY;
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
